@@ -20,11 +20,12 @@
   "author": "napthedev",
   "license": "MIT",
   "dependencies": {
-    "@coderosh/images-to-pdf": "^2.1.0",
     "axios": "^0.27.2",
     "inquirer": "^9.1.0",
     "node-html-parser": "^5.4.2-0",
     "ora": "^6.1.2",
-    "radash": "^7.0.0"
+    "pdfkit": "^0.13.0",
+    "radash": "^7.0.0",
+    "sharp": "^0.30.7"
   }
 }

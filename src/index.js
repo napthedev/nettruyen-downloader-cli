@@ -10,7 +10,8 @@ import { cluster, parallel, retry } from "radash";
 import { getChapImages } from "./services/chap.js";
 import { md5 } from "./shared/utils.js";
 import axios from "axios";
-import { imagesToPDF } from "@coderosh/images-to-pdf";
+import sharp from "sharp";
+import PDFDocument from "pdfkit";
 
 const { comicURL } = await inquirer.prompt({
   type: "input",
@@ -85,13 +86,24 @@ await parallel(10, images, async (image) => {
     fetchImageSpinner.text = `Fetching images (${++fetchedImageCount}/${
       images.length
     }) ...`;
-    const { data } = await axios.get(image, {
+    if (
+      fs.existsSync(
+        path.resolve(process.cwd(), outputFolder, "images", `${hashed}.png`)
+      )
+    )
+      return;
+    const response = await axios.get(image, {
       responseType: "arraybuffer",
       headers: {
         referer: new URL(comicURL).origin,
         origin: new URL(comicURL).origin,
       },
     });
+    let data = response.data;
+    if (response.headers["content-type"] !== "image/png") {
+      data = await sharp(response.data).png().toBuffer();
+    }
+
     await new Promise((res) => {
       fs.writeFile(
         path.resolve(process.cwd(), outputFolder, "images", `${hashed}.png`),
@@ -104,7 +116,7 @@ await parallel(10, images, async (image) => {
 
 fetchImageSpinner.succeed("Fetched all images successfully");
 
-const groups = cluster(info.chapters, groupItemCount);
+const groups = cluster(info.chapters, +groupItemCount);
 
 const convertPartSpinner = ora({
   text: "Converting parts...",
@@ -115,28 +127,48 @@ for (const [index, group] of groups.entries()) {
   convertPartSpinner.text = `Converting parts (${index + 1}/${
     groups.length
   }) ...`;
+  convertPartSpinner.render();
+
   const images = group.reduce(
     (prev, current) => [...prev, ...current.images],
     []
   );
 
-  const pdf = await imagesToPDF(
-    images.map((image) =>
-      fs.readFileSync(
-        path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.png`)
+  let doc;
+
+  for (const image of images) {
+    const buffer = fs.readFileSync(
+      path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.png`)
+    );
+
+    const metadata = await sharp(buffer).metadata();
+
+    if (typeof doc === "undefined") {
+      doc = new PDFDocument({
+        size: [metadata.width, metadata.height],
+      });
+    } else {
+      doc.addPage({ size: [metadata.width, metadata.height] });
+    }
+    doc.image(buffer, 0, 0, { width: metadata.width, height: metadata.height });
+  }
+
+  const stream = doc?.pipe(
+    fs.createWriteStream(
+      path.resolve(
+        process.cwd(),
+        outputFolder,
+        "output",
+        `${info.title} Part ${index + 1}.pdf`
       )
     )
   );
 
-  fs.writeFileSync(
-    path.resolve(
-      process.cwd(),
-      outputFolder,
-      "output",
-      `${info.title} Part ${index + 1}.pdf`
-    ),
-    Buffer.from(pdf.arrayBuffer())
-  );
+  doc?.end();
+
+  await new Promise((res) => {
+    stream?.on("finish", res);
+  });
 }
 
 convertPartSpinner.succeed("Converting to PDF successfully");
