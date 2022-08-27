@@ -1,0 +1,30 @@
+{
+  "name": "nettruyen-downloader",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "bin": {
+    "nettruyen-downloader": "src/index.js"
+  },
+  "keywords": [
+    "nettruyen",
+    "net truyen"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/napthedev/nettruyen-downloader-cli.git"
+  },
+  "author": "napthedev",
+  "license": "MIT",
+  "dependencies": {
+    "@coderosh/images-to-pdf": "^2.1.0",
+    "axios": "^0.27.2",
+    "inquirer": "^9.1.0",
+    "node-html-parser": "^5.4.2-0",
+    "ora": "^6.1.2",
+    "radash": "^7.0.0"
+  }
+}
