@@ -88,7 +88,7 @@ await parallel(10, images, async (image) => {
     }) ...`;
     if (
       fs.existsSync(
-        path.resolve(process.cwd(), outputFolder, "images", `${hashed}.png`)
+        path.resolve(process.cwd(), outputFolder, "images", `${hashed}.jpg`)
       )
     )
       return;
@@ -100,17 +100,15 @@ await parallel(10, images, async (image) => {
       },
     });
     let data = response.data;
-    if (response.headers["content-type"] !== "image/png") {
-      try {
-        data = await sharp(response.data).png().toBuffer();
-      } catch (error) {
-        data = Buffer.from(FALLBACK_IMAGE, "base64");
-      }
+    try {
+      data = await sharp(response.data).jpeg({ quality: 60 }).toBuffer();
+    } catch (error) {
+      data = Buffer.from(FALLBACK_IMAGE, "base64");
     }
 
     await new Promise((res) => {
       fs.writeFile(
-        path.resolve(process.cwd(), outputFolder, "images", `${hashed}.png`),
+        path.resolve(process.cwd(), outputFolder, "images", `${hashed}.jpg`),
         data,
         res
       );
@@ -142,7 +140,7 @@ for (const [index, group] of groups.entries()) {
 
   for (const image of images) {
     const buffer = fs.readFileSync(
-      path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.png`)
+      path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.jpg`)
     );
 
     const metadata = await sharp(buffer).metadata();
