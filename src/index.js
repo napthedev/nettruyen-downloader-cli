@@ -3,7 +3,7 @@
 import inquirer from "inquirer";
 import ora from "ora";
 import { getComicInfo } from "./services/comic.js";
-import { URL_REGEX } from "./shared/constants.js";
+import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants.js";
 import fs from "fs";
 import path from "path";
 import { cluster, parallel, retry } from "radash";
@@ -101,7 +101,11 @@ await parallel(10, images, async (image) => {
     });
     let data = response.data;
     if (response.headers["content-type"] !== "image/png") {
-      data = await sharp(response.data).png().toBuffer();
+      try {
+        data = await sharp(response.data).png().toBuffer();
+      } catch (error) {
+        data = Buffer.from(FALLBACK_IMAGE, "base64");
+      }
     }
 
     await new Promise((res) => {
