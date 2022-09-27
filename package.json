@@ -1,5 +1,5 @@
 {
-  "name": "@ducanh2912/nettruyen-downloader",
+  "name": "@ducanh2912/nettruyen-dl",
   "version": "1.1.5",
   "type": "module",
   "files": [
@@ -10,9 +10,7 @@
     "build": "rimraf dist && rollup -c",
     "prepublishOnly": "npm run build"
   },
-  "bin": {
-    "ducanh-nettruyen-dl": "dist/index.js"
-  },
+  "bin": "./dist/index.js",
   "keywords": [
     "nettruyen",
     "net truyen"

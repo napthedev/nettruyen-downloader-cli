@@ -8,6 +8,7 @@ export default {
   output: {
     file: "dist/index.js",
     format: "es",
+    banner: "#!/usr/bin/env node"
   },
   plugins: [typescript()],
 };
