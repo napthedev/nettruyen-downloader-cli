@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "rollup -c",
+    "build": "rimraf dist && rollup -c",
     "prepublishOnly": "npm run build"
   },
   "bin": {
