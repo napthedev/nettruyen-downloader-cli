@@ -33,7 +33,6 @@
     "sharp": "0.31.0"
   },
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "14.1.0",
     "@rollup/plugin-typescript": "8.5.0",
     "@types/inquirer": "9.0.1",
     "@types/node": "18.7.23",
