@@ -1,8 +1,9 @@
 import axios from "axios";
 import { parse } from "node-html-parser";
+import { urlWithProxy } from "../utils/url.js";
 
 export const getComicInfo = async (comicURL) => {
-  const source = (await axios.get(comicURL)).data;
+  const source = (await axios.get(urlWithProxy(comicURL))).data;
 
   const dom = parse(source);
 

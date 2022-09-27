@@ -3,5 +3,5 @@
 Run this in the terminal
 
 ```
-npx nettruyen-downloader
+npx nettruyen-downloader@latest
 ```
