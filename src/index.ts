@@ -1,14 +1,12 @@
-#! /usr/bin/env node
-
 import inquirer from "inquirer";
 import ora from "ora";
 import { getComicInfo } from "./services/comic.js";
-import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants.js";
+import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants";
 import fs from "fs";
 import path from "path";
 import { cluster, parallel, retry } from "radash";
 import { getChapImages } from "./services/chap.js";
-import { md5 } from "./shared/utils.js";
+import { md5 } from "./shared/utils";
 import axios from "axios";
 import sharp from "sharp";
 import PDFDocument from "pdfkit";
@@ -63,7 +61,7 @@ const fetchChapSpinner = ora({
   hideCursor: false,
 }).start();
 
-let images = [];
+let images: (string | undefined)[] = [];
 let fetchedChaptersCount = 0;
 await parallel(20, info.chapters, async (chapter) => {
   fetchChapSpinner.text = `Fetching chapter ${++fetchedChaptersCount}`;
@@ -80,6 +78,11 @@ const fetchImageSpinner = ora({
 
 let fetchedImageCount = 0;
 await parallel(10, images, async (image) => {
+  if (!image)
+  {
+    return;
+  }
+
   const hashed = md5(image);
 
   await retry({ times: 10 }, async () => {
@@ -133,12 +136,16 @@ for (const [index, group] of groups.entries()) {
 
   const images = group.reduce(
     (prev, current) => [...prev, ...current.images],
-    []
+    [] as (string | undefined)[]
   );
 
   let doc;
 
   for (const image of images) {
+    if (!image)
+    {
+      continue;
+    }
     const buffer = fs.readFileSync(
       path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.jpg`)
     );
@@ -147,10 +154,10 @@ for (const [index, group] of groups.entries()) {
 
     if (typeof doc === "undefined") {
       doc = new PDFDocument({
-        size: [metadata.width, metadata.height],
+        size: [metadata.width || 1000, metadata.height || 1000],
       });
     } else {
-      doc.addPage({ size: [metadata.width, metadata.height] });
+      doc.addPage({ size: [metadata.width || 1000, metadata.height || 1000] });
     }
     doc.image(buffer, 0, 0, { width: metadata.width, height: metadata.height });
   }

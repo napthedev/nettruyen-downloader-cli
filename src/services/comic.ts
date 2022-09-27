@@ -2,7 +2,7 @@ import axios from "axios";
 import { parse } from "node-html-parser";
 import { urlWithProxy } from "../utils/url.js";
 
-export const getComicInfo = async (comicURL) => {
+export const getComicInfo = async (comicURL: string) => {
   const source = (await axios.get(urlWithProxy(comicURL))).data;
 
   const dom = parse(source);
@@ -15,10 +15,19 @@ export const getComicInfo = async (comicURL) => {
     chapters: Array.from(
       dom.querySelectorAll(".list-chapter ul li:not(.heading)")
     )
-      .map((li) => ({
-        title: li.querySelector(".chapter a")?.textContent,
-        url: li.querySelector(".chapter a")?.getAttribute("href"),
-      }))
+      .map((li) => {
+        const title = li.querySelector(".chapter a")?.textContent;
+        const url = li.querySelector(".chapter a")?.getAttribute("href");
+        if (!title || !url)
+        {
+          throw new Error("404");
+        }
+        return {
+          title,
+          url,
+          images: ([] as (string | undefined)[])
+        };
+      })
       .reverse(),
   };
 

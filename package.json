@@ -1,13 +1,17 @@
 {
-  "name": "nettruyen-downloader",
+  "name": "@ducanh2912/nettruyen-downloader",
   "version": "1.1.4",
-  "main": "src/index.js",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "node src/index.js"
+    "dev": "tsx watch src/index.ts",
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
   },
   "bin": {
-    "nettruyen-downloader": "src/index.js"
+    "ducanh-nettruyen-dl": "dist/index.js"
   },
   "keywords": [
     "nettruyen",
@@ -15,17 +19,29 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/napthedev/nettruyen-downloader-cli.git"
+    "url": "https://github.com/DuCanhGH/nettruyen-downloader.git"
   },
-  "author": "napthedev",
+  "author": "napthedev, DuCanhGH",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.27.2",
-    "inquirer": "^9.1.0",
-    "node-html-parser": "^5.4.2-0",
-    "ora": "^6.1.2",
-    "pdfkit": "^0.13.0",
-    "radash": "^7.0.0",
-    "sharp": "^0.30.7"
+    "axios": "0.27.2",
+    "inquirer": "9.1.2",
+    "node-html-parser": "6.1.1",
+    "ora": "6.1.2",
+    "pdfkit": "0.13.0",
+    "radash": "7.1.0",
+    "sharp": "0.31.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "14.1.0",
+    "@rollup/plugin-typescript": "8.5.0",
+    "@types/inquirer": "9.0.1",
+    "@types/node": "18.7.23",
+    "@types/pdfkit": "0.12.6",
+    "@types/sharp": "0.31.0",
+    "rimraf": "3.0.2",
+    "rollup": "2.79.1",
+    "tsx": "3.9.0",
+    "typescript": "4.8.3"
   }
 }
