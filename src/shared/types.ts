@@ -6,4 +6,4 @@ interface ChapterType {
   images: ImageType[];
 }
 
-export { ImageType, ChapterType };
+export { ChapterType, ImageType };

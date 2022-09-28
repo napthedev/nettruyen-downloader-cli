@@ -10,7 +10,7 @@ import sharp from "sharp";
 import { getChapImages } from "./services/chap.js";
 import { getComicInfo } from "./services/comic.js";
 import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants.js";
-import type { ImageType, ChapterType } from "./shared/types.js";
+import type { ChapterType, ImageType } from "./shared/types.js";
 import { md5 } from "./shared/utils.js";
 
 const { comicURL } = await inquirer.prompt({
@@ -77,10 +77,10 @@ const images: ImageType[] = [];
 let fetchedChaptersCount = 0;
 
 let groups: (ChapterType[] & {
-  groupIndex: number
+  groupIndex: number;
 })[] = cluster(info.chapters, +groupItemCount).map((a, index) => ({
   ...a,
-  groupIndex: index
+  groupIndex: index,
 }));
 
 if (downloadType === "Select parts") {
@@ -89,7 +89,8 @@ if (downloadType === "Select parts") {
     message: "Select parts",
     choices: groups.map((_, index) => `Part ${index + 1}`),
     validate: (value: string[]) => {
-      if (value.length < 1) return "Number of selected parts must not be less than 1";
+      if (value.length < 1)
+        return "Number of selected parts must not be less than 1";
       return true;
     },
     name: "selectedParts",
