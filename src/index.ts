@@ -76,12 +76,8 @@ const images: ImageType[] = [];
 
 let fetchedChaptersCount = 0;
 
-let groups: (ChapterType[] & {
-  groupIndex: number;
-})[] = cluster(info.chapters, +groupItemCount).map((a, index) => ({
-  ...a,
-  groupIndex: index,
-}));
+let groups = cluster(info.chapters, +groupItemCount);
+let groupIndexes: number[] = [];
 
 if (downloadType === "Select parts") {
   const { selectedParts } = await inquirer.prompt({
@@ -95,7 +91,10 @@ if (downloadType === "Select parts") {
     },
     name: "selectedParts",
   });
-  groups = (selectedParts as string[]).map((a) => groups[+a.split(" ")[1] - 1]);
+  groups = (selectedParts as string[]).map((a) => {
+    groupIndexes = [...groupIndexes, +a.split(" ")[1] - 1];
+    return groups[+a.split(" ")[1] - 1];
+  });
 }
 
 fetchChapSpinner.start();
@@ -210,7 +209,7 @@ for (const [index, group] of groups.entries()) {
         process.cwd(),
         outputFolder,
         "output",
-        `${info.title} Part ${group.groupIndex + 1}.pdf`
+        `${info.title} Part ${groupIndexes[index] + 1}.pdf`
       )
     )
   );
