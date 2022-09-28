@@ -9,8 +9,9 @@ import sharp from "sharp";
 
 import { getChapImages } from "./services/chap.js";
 import { getComicInfo } from "./services/comic.js";
-import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants";
-import { md5 } from "./shared/utils";
+import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants.js";
+import type { ImageType, ChapterType } from "./shared/types.js";
+import { md5 } from "./shared/utils.js";
 
 const { comicURL } = await inquirer.prompt({
   type: "input",
@@ -28,7 +29,7 @@ const info = await getComicInfo(comicURL).catch(() => {
 
 spinner.succeed(`Comic title: ${info.title}`);
 
-console.log("\nThe script will download the comic into groups of chapters");
+console.log("\nThis script will download the comic into groups of chapters");
 
 const { groupItemCount } = await inquirer.prompt({
   type: "input",
@@ -41,6 +42,13 @@ const { groupItemCount } = await inquirer.prompt({
     return true;
   },
   name: "groupItemCount",
+});
+
+const { downloadType } = await inquirer.prompt({
+  type: "list",
+  message: "Choose download type:",
+  choices: ["Download all parts", "Select parts"],
+  name: "downloadType",
 });
 
 const { outputFolder } = await inquirer.prompt({
@@ -62,12 +70,36 @@ fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "output"), {
 const fetchChapSpinner = ora({
   text: "Fetching chapter...",
   hideCursor: false,
-}).start();
+});
 
-const images: (string | undefined)[] = [];
+const images: ImageType[] = [];
+
 let fetchedChaptersCount = 0;
 
-await parallel(20, info.chapters, async (chapter) => {
+let groups: (ChapterType[] & {
+  groupIndex: number
+})[] = cluster(info.chapters, +groupItemCount).map((a, index) => ({
+  ...a,
+  groupIndex: index
+}));
+
+if (downloadType === "Select parts") {
+  const { selectedParts } = await inquirer.prompt({
+    type: "checkbox",
+    message: "Select parts",
+    choices: groups.map((_, index) => `Part ${index + 1}`),
+    validate: (value: string[]) => {
+      if (value.length < 1) return "Number of selected parts must not be less than 1";
+      return true;
+    },
+    name: "selectedParts",
+  });
+  groups = (selectedParts as string[]).map((a) => groups[+a.split(" ")[1] - 1]);
+}
+
+fetchChapSpinner.start();
+
+await parallel(20, ([] as ChapterType[]).concat(...groups), async (chapter) => {
   fetchChapSpinner.text = `Fetching chapter ${++fetchedChaptersCount}`;
   const chapImages = await getChapImages(chapter.url);
   chapter.images = chapImages;
@@ -130,8 +162,6 @@ await parallel(10, images, async (image) => {
 
 fetchImageSpinner.succeed("Fetched all images successfully");
 
-const groups = cluster(info.chapters, +groupItemCount);
-
 const convertPartSpinner = ora({
   text: "Converting parts...",
   hideCursor: false,
@@ -146,7 +176,7 @@ for (const [index, group] of groups.entries()) {
 
   const images = group.reduce(
     (prev, current) => [...prev, ...current.images],
-    [] as (string | undefined)[]
+    [] as ImageType[]
   );
 
   let doc;
@@ -179,7 +209,7 @@ for (const [index, group] of groups.entries()) {
         process.cwd(),
         outputFolder,
         "output",
-        `${info.title} Part ${index + 1}.pdf`
+        `${info.title} Part ${group.groupIndex + 1}.pdf`
       )
     )
   );
@@ -191,10 +221,10 @@ for (const [index, group] of groups.entries()) {
   });
 }
 
-convertPartSpinner.succeed("Converting to PDF successfully");
+convertPartSpinner.succeed("Converted to PDF successfully");
 
 console.log(
-  `🎉 Congratulations. Your PDF files are at ${path.resolve(
+  `🎉 Congratulations! Your PDF files are at ${path.resolve(
     process.cwd(),
     outputFolder,
     "output"

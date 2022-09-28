@@ -10,5 +10,22 @@ export default {
     format: "es",
     banner: "#!/usr/bin/env node",
   },
-  plugins: [typescript()],
+  plugins: [
+    typescript({
+      noForceEmit: true,
+      noEmitOnError: true,
+    }),
+  ],
+  external: [
+    "axios",
+    "fs",
+    "inquirer",
+    "ora",
+    "path",
+    "pdfkit",
+    "radash",
+    "sharp",
+    "node-html-parser",
+    "crypto",
+  ],
 };

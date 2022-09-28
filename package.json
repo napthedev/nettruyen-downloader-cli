@@ -6,8 +6,8 @@
     "dist"
   ],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "rimraf dist && rollup -c",
+    "dev": "tsx src/index.ts",
+    "build": "rimraf dist && npm run lint && rollup -c",
     "format": "prettier --write .",
     "lint": "eslint **/*.ts **/*.tsx",
     "prepublishOnly": "npm run build"
@@ -30,7 +30,8 @@
     "ora": "6.1.2",
     "pdfkit": "0.13.0",
     "radash": "7.1.0",
-    "sharp": "0.31.0"
+    "sharp": "0.31.0",
+    "tslib": "2.4.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "1.3.2",

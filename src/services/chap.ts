@@ -1,9 +1,10 @@
 import axios from "axios";
 import { parse } from "node-html-parser";
 
+import type { ImageType } from "../shared/types.js";
 import { urlWithProxy } from "../utils/url.js";
 
-export const getChapImages = async (url: string) => {
+export const getChapImages = async (url: string): Promise<ImageType[]> => {
   const source = (await axios.get(urlWithProxy(url))).data;
 
   const dom = parse(source);

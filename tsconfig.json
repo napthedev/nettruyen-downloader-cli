@@ -14,9 +14,8 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noEmit": true,
     "removeComments": true,
-    "checkJs": true
+    "checkJs": true,
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

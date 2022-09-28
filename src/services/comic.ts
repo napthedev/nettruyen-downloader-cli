@@ -1,9 +1,13 @@
 import axios from "axios";
 import { parse } from "node-html-parser";
 
+import type { ImageType, ChapterType } from "../shared/types.js";
 import { urlWithProxy } from "../utils/url.js";
 
-export const getComicInfo = async (comicURL: string) => {
+export const getComicInfo = async (comicURL: string): Promise<{
+  title: string | undefined,
+  chapters: ChapterType[],
+}> => {
   const source = (await axios.get(urlWithProxy(comicURL))).data;
 
   const dom = parse(source);
@@ -16,7 +20,7 @@ export const getComicInfo = async (comicURL: string) => {
     chapters: Array.from(
       dom.querySelectorAll(".list-chapter ul li:not(.heading)")
     )
-      .map((li) => {
+      .map(li => {
         const title = li.querySelector(".chapter a")?.textContent;
         const url = li.querySelector(".chapter a")?.getAttribute("href");
         if (!title || !url) {
@@ -25,11 +29,10 @@ export const getComicInfo = async (comicURL: string) => {
         return {
           title,
           url,
-          images: [] as (string | undefined)[],
+          images: [] as ImageType[],
         };
       })
       .reverse(),
   };
-
   return result;
 };
