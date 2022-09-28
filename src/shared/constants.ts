@@ -1,3 +1,13 @@
+import inquirer from "inquirer";
+
+export const DOWNLOAD_TYPES = [
+  "Download all parts",
+  "Select parts",
+  new inquirer.Separator(),
+  "Download a chapter",
+  "Download a range of chapters",
+] as const;
+
 export const URL_REGEX =
   /^https?:\/\/(www)?\.?nettruyen.+\.((com)|(net))\/truyen-tranh\/.+$/gm;
 

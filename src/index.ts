@@ -9,9 +9,18 @@ import sharp from "sharp";
 
 import { getChapImages } from "./services/chap.js";
 import { getComicInfo } from "./services/comic.js";
-import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants.js";
-import type { ChapterType, ImageType } from "./shared/types.js";
+import {
+  DOWNLOAD_TYPES,
+  FALLBACK_IMAGE,
+  URL_REGEX,
+} from "./shared/constants.js";
+import type {
+  ChapterType,
+  DownloadTypesType,
+  ImageType,
+} from "./shared/types.js";
 import { md5 } from "./shared/utils.js";
+import { rangeAtoB } from "./utils/range.js";
 
 const { comicURL } = await inquirer.prompt({
   type: "input",
@@ -29,29 +38,18 @@ const info = await getComicInfo(comicURL).catch(() => {
 
 spinner.succeed(`Comic title: ${info.title}`);
 
-console.log("\nThis script will download the comic into groups of chapters");
-
-const { groupItemCount } = await inquirer.prompt({
-  type: "input",
-  message: "Group item count:",
-  validate: (value) => {
-    if (!value || Number.isNaN(value)) return "Input must be a number";
-    if (+value < 1) return "Count must not be less than 1";
-    if (+value > info.chapters.length)
-      return "Count must not be more than chapters count";
-    return true;
-  },
-  name: "groupItemCount",
-});
-
-const { downloadType } = await inquirer.prompt({
+const { downloadType } = await inquirer.prompt<{
+  downloadType: DownloadTypesType;
+}>({
   type: "list",
   message: "Choose download type:",
-  choices: ["Download all parts", "Select parts"],
+  choices: DOWNLOAD_TYPES,
   name: "downloadType",
 });
 
-const { outputFolder } = await inquirer.prompt({
+const { outputFolder } = await inquirer.prompt<{
+  outputFolder: string;
+}>({
   type: "input",
   message: "Enter the output folder:",
   name: "outputFolder",
@@ -76,25 +74,105 @@ const images: ImageType[] = [];
 
 let fetchedChaptersCount = 0;
 
-let groups = cluster(info.chapters, +groupItemCount);
+let groups: ChapterType[][] = [];
 let groupIndexes: number[] = [];
 
-if (downloadType === "Select parts") {
-  const { selectedParts } = await inquirer.prompt({
-    type: "checkbox",
-    message: "Select parts",
-    choices: groups.map((_, index) => `Part ${index + 1}`),
-    validate: (value: string[]) => {
-      if (value.length < 1)
-        return "Number of selected parts must not be less than 1";
+if (downloadType === "Select parts" || downloadType === "Download all parts") {
+  console.log("This script will download the comic into groups of chapters");
+  const { groupItemCount } = await inquirer.prompt<{
+    groupItemCount: string;
+  }>({
+    type: "input",
+    message: "Group item count:",
+    validate: (value) => {
+      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
+        return "Input must be an integer";
+      if (+value < 1) return "Count must not be less than 1";
+      if (+value > info.chapters.length)
+        return "Count must not be more than chapters count";
       return true;
     },
-    name: "selectedParts",
+    name: "groupItemCount",
   });
-  groups = (selectedParts as string[]).map((a) => {
-    groupIndexes = [...groupIndexes, +a.split(" ")[1] - 1];
-    return groups[+a.split(" ")[1] - 1];
+  groups = cluster(info.chapters, +groupItemCount);
+  if (downloadType === "Select parts") {
+    const { selectedParts } = await inquirer.prompt<{
+      selectedParts: string[];
+    }>({
+      type: "checkbox",
+      message: "Select parts",
+      choices: groups.map((_, index) => `Part ${index + 1}`),
+      validate: (value: string[]) => {
+        if (value.length < 1) {
+          return "Number of selected parts must not be less than 1";
+        }
+        return true;
+      },
+      name: "selectedParts",
+    });
+    groups = selectedParts.map((a) => {
+      groupIndexes = [...groupIndexes, +a.split(" ")[1] - 1];
+      return groups[+a.split(" ")[1] - 1];
+    });
+  } else {
+    groupIndexes = Array.from({ length: groups.length }, (_v, i) => i);
+  }
+} else if (downloadType === "Download a chapter") {
+  console.log("This script will download a chapter from the comic");
+  const { chapter } = await inquirer.prompt({
+    type: "input",
+    message: `Choose a chapter (1 - ${info.chapters.length}):`,
+    validate: (value) => {
+      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
+        return "Input must be an integer";
+      if (+value < 1) return "Chapter must not be less than 1";
+      if (+value > info.chapters.length)
+        return "Chapter must not be more than chapters count";
+      return true;
+    },
+    name: "chapter",
   });
+  groups = [[info.chapters[chapter - 1]]];
+  groupIndexes = [chapter - 1];
+} else if (downloadType === "Download a range of chapters") {
+  console.log("This script will download a range of chapters from the comic");
+  const { startChapter } = await inquirer.prompt<{
+    startChapter: string;
+  }>({
+    type: "input",
+    message: `Choose start chapter (1 - ${info.chapters.length}):`,
+    validate: (value) => {
+      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
+        return "Input must be an integer";
+      if (+value < 1) return "Chapter must not be less than 1";
+      if (+value > info.chapters.length)
+        return "Chapter must not be more than chapters count";
+      return true;
+    },
+    name: "startChapter",
+  });
+  const { endChapter } = await inquirer.prompt<{
+    endChapter: string;
+  }>({
+    type: "input",
+    message: `Choose end chapter (${startChapter} - ${info.chapters.length}):`,
+    validate: (value) => {
+      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
+        return "Input must be an integer";
+      if (+value < 1) return "Chapter must not be less than 1";
+      if (+value > info.chapters.length)
+        return "Chapter must not be more than chapters count";
+      if (+value < +startChapter)
+        return "End chapter must not be smaller than start chapter";
+      return true;
+    },
+    name: "endChapter",
+  });
+  groupIndexes = rangeAtoB(+startChapter - 1, +endChapter - 1);
+  groups = [];
+  for (const i of groupIndexes) {
+    groups.push([info.chapters[i]]);
+  }
 }
 
 fetchChapSpinner.start();
@@ -209,7 +287,12 @@ for (const [index, group] of groups.entries()) {
         process.cwd(),
         outputFolder,
         "output",
-        `${info.title} Part ${groupIndexes[index] + 1}.pdf`
+        `${info.title} ${
+          downloadType === "Download a chapter" ||
+          downloadType === "Download a range of chapters"
+            ? "Chap"
+            : "Part"
+        } ${groupIndexes[index] + 1}.pdf`
       )
     )
   );
