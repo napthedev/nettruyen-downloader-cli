@@ -6,6 +6,7 @@ export const DOWNLOAD_TYPES = [
   new inquirer.Separator(),
   "Download a chapter",
   "Download a range of chapters",
+  "Download a range of chapters into one file",
 ] as const;
 
 export const URL_REGEX =

@@ -7,7 +7,7 @@ import PDFDocument from "pdfkit";
 import { cluster, parallel, retry } from "radash";
 import sharp from "sharp";
 
-import { getChapImages } from "./services/chap.js";
+import { getChapImages, getStartEndChap } from "./services/chap.js";
 import { getComicInfo } from "./services/comic.js";
 import {
   DOWNLOAD_TYPES,
@@ -136,43 +136,21 @@ if (downloadType === "Select parts" || downloadType === "Download all parts") {
   groupIndexes = [chapter - 1];
 } else if (downloadType === "Download a range of chapters") {
   console.log("This script will download a range of chapters from the comic");
-  const { startChapter } = await inquirer.prompt<{
-    startChapter: string;
-  }>({
-    type: "input",
-    message: `Choose start chapter (1 - ${info.chapters.length}):`,
-    validate: (value) => {
-      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
-        return "Input must be an integer";
-      if (+value < 1) return "Chapter must not be less than 1";
-      if (+value > info.chapters.length)
-        return "Chapter must not be more than chapters count";
-      return true;
-    },
-    name: "startChapter",
-  });
-  const { endChapter } = await inquirer.prompt<{
-    endChapter: string;
-  }>({
-    type: "input",
-    message: `Choose end chapter (${startChapter} - ${info.chapters.length}):`,
-    validate: (value) => {
-      if (!value || Number.isNaN(value) || !Number.isInteger(+value))
-        return "Input must be an integer";
-      if (+value < 1) return "Chapter must not be less than 1";
-      if (+value > info.chapters.length)
-        return "Chapter must not be more than chapters count";
-      if (+value < +startChapter)
-        return "End chapter must not be smaller than start chapter";
-      return true;
-    },
-    name: "endChapter",
-  });
+  const { startChapter, endChapter } = await getStartEndChap(info);
   groupIndexes = rangeAtoB(+startChapter - 1, +endChapter - 1);
   groups = [];
   for (const i of groupIndexes) {
     groups.push([info.chapters[i]]);
   }
+} else if (downloadType === "Download a range of chapters into one file") {
+  const { startChapter, endChapter } = await getStartEndChap(info);
+  groupIndexes = rangeAtoB(+startChapter - 1, +endChapter - 1);
+  groups = [];
+  const group: ChapterType[] = [];
+  for (const i of groupIndexes) {
+    group.push(info.chapters[i]);
+  }
+  groups.push(group);
 }
 
 fetchChapSpinner.start();
@@ -289,10 +267,17 @@ for (const [index, group] of groups.entries()) {
         "output",
         `${info.title} ${
           downloadType === "Download a chapter" ||
-          downloadType === "Download a range of chapters"
+          downloadType === "Download a range of chapters" ||
+          downloadType === "Download a range of chapters into one file"
             ? "Chap"
             : "Part"
-        } ${groupIndexes[index] + 1}.pdf`
+        } ${
+          downloadType === "Download a range of chapters into one file"
+            ? `${groupIndexes[0] + 1} - ${
+                groupIndexes[groupIndexes.length - 1] + 1
+              }`
+            : groupIndexes[index] + 1
+        }.pdf`
       )
     )
   );

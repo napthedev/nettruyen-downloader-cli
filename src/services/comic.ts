@@ -4,12 +4,12 @@ import { parse } from "node-html-parser";
 import type { ChapterType, ImageType } from "../shared/types.js";
 import { urlWithProxy } from "../utils/url.js";
 
-export const getComicInfo = async (
-  comicURL: string
-): Promise<{
+export interface ComicInfo {
   title: string | undefined;
   chapters: ChapterType[];
-}> => {
+}
+
+export const getComicInfo = async (comicURL: string): Promise<ComicInfo> => {
   const source = (await axios.get(urlWithProxy(comicURL))).data;
 
   const dom = parse(source);
