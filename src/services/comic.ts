@@ -1,5 +1,6 @@
 import axios from "axios";
 import { parse } from "node-html-parser";
+
 import { urlWithProxy } from "../utils/url.js";
 
 export const getComicInfo = async (comicURL: string) => {
@@ -18,14 +19,13 @@ export const getComicInfo = async (comicURL: string) => {
       .map((li) => {
         const title = li.querySelector(".chapter a")?.textContent;
         const url = li.querySelector(".chapter a")?.getAttribute("href");
-        if (!title || !url)
-        {
+        if (!title || !url) {
           throw new Error("404");
         }
         return {
           title,
           url,
-          images: ([] as (string | undefined)[])
+          images: [] as (string | undefined)[],
         };
       })
       .reverse(),

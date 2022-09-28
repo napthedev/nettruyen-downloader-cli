@@ -1,15 +1,16 @@
+import axios from "axios";
+import fs from "fs";
 import inquirer from "inquirer";
 import ora from "ora";
+import path from "path";
+import PDFDocument from "pdfkit";
+import { cluster, parallel, retry } from "radash";
+import sharp from "sharp";
+
+import { getChapImages } from "./services/chap.js";
 import { getComicInfo } from "./services/comic.js";
 import { FALLBACK_IMAGE, URL_REGEX } from "./shared/constants";
-import fs from "fs";
-import path from "path";
-import { cluster, parallel, retry } from "radash";
-import { getChapImages } from "./services/chap.js";
 import { md5 } from "./shared/utils";
-import axios from "axios";
-import sharp from "sharp";
-import PDFDocument from "pdfkit";
 
 const { comicURL } = await inquirer.prompt({
   type: "input",
@@ -49,9 +50,11 @@ const { outputFolder } = await inquirer.prompt({
 });
 
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder), { recursive: true });
+
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "images"), {
   recursive: true,
 });
+
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "output"), {
   recursive: true,
 });
@@ -61,14 +64,16 @@ const fetchChapSpinner = ora({
   hideCursor: false,
 }).start();
 
-let images: (string | undefined)[] = [];
+const images: (string | undefined)[] = [];
 let fetchedChaptersCount = 0;
+
 await parallel(20, info.chapters, async (chapter) => {
   fetchChapSpinner.text = `Fetching chapter ${++fetchedChaptersCount}`;
   const chapImages = await getChapImages(chapter.url);
   chapter.images = chapImages;
   images.push(...chapImages);
 });
+
 fetchChapSpinner.succeed("Fetched all chapters successfully");
 
 const fetchImageSpinner = ora({
@@ -77,9 +82,9 @@ const fetchImageSpinner = ora({
 }).start();
 
 let fetchedImageCount = 0;
+
 await parallel(10, images, async (image) => {
-  if (!image)
-  {
+  if (!image) {
     return;
   }
 
@@ -93,8 +98,10 @@ await parallel(10, images, async (image) => {
       fs.existsSync(
         path.resolve(process.cwd(), outputFolder, "images", `${hashed}.jpg`)
       )
-    )
+    ) {
       return;
+    }
+
     const response = await axios.get(image, {
       responseType: "arraybuffer",
       headers: {
@@ -102,7 +109,9 @@ await parallel(10, images, async (image) => {
         origin: new URL(comicURL).origin,
       },
     });
+
     let data = response.data;
+
     try {
       data = await sharp(response.data).jpeg({ quality: 60 }).toBuffer();
     } catch (error) {
@@ -132,6 +141,7 @@ for (const [index, group] of groups.entries()) {
   convertPartSpinner.text = `Converting parts (${index + 1}/${
     groups.length
   }) ...`;
+
   convertPartSpinner.render();
 
   const images = group.reduce(
@@ -142,10 +152,10 @@ for (const [index, group] of groups.entries()) {
   let doc;
 
   for (const image of images) {
-    if (!image)
-    {
+    if (!image) {
       continue;
     }
+
     const buffer = fs.readFileSync(
       path.resolve(process.cwd(), outputFolder, "images", `${md5(image)}.jpg`)
     );
@@ -159,6 +169,7 @@ for (const [index, group] of groups.entries()) {
     } else {
       doc.addPage({ size: [metadata.width || 1000, metadata.height || 1000] });
     }
+
     doc.image(buffer, 0, 0, { width: metadata.width, height: metadata.height });
   }
 
