@@ -56,9 +56,11 @@ const { outputFolder } = await inquirer.prompt<{
 });
 
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder), { recursive: true });
+
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "images"), {
   recursive: true,
 });
+
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "output"), {
   recursive: true,
 });
