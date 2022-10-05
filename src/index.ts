@@ -56,11 +56,9 @@ const { outputFolder } = await inquirer.prompt<{
 });
 
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder), { recursive: true });
-
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "images"), {
   recursive: true,
 });
-
 fs.mkdirSync(path.resolve(process.cwd(), outputFolder, "output"), {
   recursive: true,
 });
@@ -143,7 +141,9 @@ if (downloadType === "Select parts" || downloadType === "Download all parts") {
     groups.push([info.chapters[i]]);
   }
 } else if (downloadType === "Download a range of chapters into one file") {
-  console.log("This script will download a range of chapters from the comic into one file");
+  console.log(
+    "This script will download a range of chapters from the comic into one file"
+  );
   const { startChapter, endChapter } = await getStartEndChap(info);
   groupIndexes = rangeAtoB(+startChapter - 1, +endChapter - 1);
   groups = [];
@@ -299,3 +299,4 @@ console.log(
     "output"
   )}`
 );
+
