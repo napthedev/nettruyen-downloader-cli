@@ -26,6 +26,9 @@
   },
   "author": "napthedev, DuCanhGH",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "axios": "0.27.2",
     "inquirer": "9.1.2",
