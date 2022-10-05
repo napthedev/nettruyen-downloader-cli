@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+package.json
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# testing
+/coverage
+
+# production
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+*.log
+
+# env files
+.env*

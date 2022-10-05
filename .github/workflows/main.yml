@@ -1,0 +1,32 @@
+name: CI
+on: [push]
+jobs:
+  build:
+    name: Typecheck, lint, test, and build on Node ${{ matrix.node-version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node-version: ["16.x"]
+        pnpm-version: ["7.x"]
+        os: [ubuntu-latest]
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Use pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ matrix.pnpm-version }}
+      - name: Use Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Build
+        run: pnpm build
