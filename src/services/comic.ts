@@ -10,7 +10,7 @@ export interface ComicInfo {
 }
 
 export const getComicInfo = async (comicURL: string): Promise<ComicInfo> => {
-  const source = (await axios.get(urlWithProxy(comicURL))).data;
+  const source = (await axios.get<string>(urlWithProxy(comicURL))).data;
 
   const dom = parse(source);
 
