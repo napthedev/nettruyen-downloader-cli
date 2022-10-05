@@ -1,6 +1,6 @@
 {
   "name": "nettruyen-downloader",
-  "version": "1.1.6",
+  "version": "0.0.0-development",
   "main": "src/index.js",
   "type": "module",
   "files": [
@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "lint": "eslint **/*.ts **/*.tsx",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "semantic-release": "semantic-release --branches master"
   },
   "bin": "./dist/index.js",
   "keywords": [
@@ -52,6 +53,7 @@
     "rollup": "2.79.1",
     "tsx": "3.9.0",
     "tslib": "2.4.0",
-    "typescript": "4.8.4"
+    "typescript": "4.8.4",
+    "semantic-release": "^19.0.5"
   }
 }
