@@ -10,7 +10,7 @@
     "start": "ts-node-esm src/index.ts",
     "build": "tsc",
     "format": "prettier --write .",
-    "lint": "eslint **/*.ts **/*.tsx",
+    "lint": "eslint **/*.ts",
     "typecheck": "tsc --noEmit",
     "prepublish": "npm run build",
     "prepare": "husky install"
