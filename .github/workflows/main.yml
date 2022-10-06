@@ -44,5 +44,8 @@ jobs:
           node-version: "lts/*"
       - name: Install dependencies
         run: npm install
-      - name: Bump version
-        run: node scripts/publish.js ${{ github.event.head_commit.message }} ${{ github.actor }} ${{ secrets.NPM_TOKEN }}
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
