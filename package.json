@@ -1,6 +1,6 @@
 {
   "name": "nettruyen-downloader",
-  "version": "2.0.0",
+  "version": "0.0.0",
   "main": "src/index.js",
   "type": "module",
   "files": [

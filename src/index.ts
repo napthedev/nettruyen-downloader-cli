@@ -19,7 +19,7 @@ import type {
   DownloadTypesType,
   ImageType,
 } from "./shared/types.js";
-import { md5 } from "./shared/utils.js";
+import { md5 } from "./utils/hash";
 import { rangeAtoB } from "./utils/range.js";
 
 const { comicURL } = await inquirer.prompt({
