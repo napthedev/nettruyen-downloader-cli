@@ -26,14 +26,14 @@ if (!version) {
   process.exit(0);
 }
 
-execSync(`npm version ${version}`, { cwd: process.cwd() });
-
-execSync(`git config --global 'user.name ${username}'`, { cwd: process.cwd() });
+execSync(`git config --global user.name '${username}'`, { cwd: process.cwd() });
 
 execSync(
   `git config --global user.email '${username}@users.noreply.github.com'`,
   { cwd: process.cwd() }
 );
+
+execSync(`npm version ${version}`, { cwd: process.cwd() });
 
 execSync(`git push`, { cwd: process.cwd() });
 
