@@ -40,4 +40,5 @@ execSync(`git push`, { cwd: process.cwd() });
 npmPublish({
   package: path.resolve(process.cwd(), "package.json"),
   token,
+  access: "public",
 });
