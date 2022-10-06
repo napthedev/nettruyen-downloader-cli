@@ -37,8 +37,6 @@ execSync(`npm version ${version}`, { cwd: process.cwd() });
 
 execSync(`git push`, { cwd: process.cwd() });
 
-execSync(`npm publish --access public`, { cwd: process.cwd() });
-
 npmPublish({
   package: path.resolve(process.cwd(), "package.json"),
   token,
