@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/napthedev/nettruyen-downloader-cli/compare/v1.0.1...v1.0.2) (2022-10-07)
+
+
+### Bug Fixes
+
+* add shebang for cli to work ([8bcb7ed](https://github.com/napthedev/nettruyen-downloader-cli/commit/8bcb7ed38e30843060db4d2e2df88e7e6a7f8f16))
+
 ## [1.0.1](https://github.com/napthedev/nettruyen-downloader-cli/compare/v1.0.0...v1.0.1) (2022-10-07)
 
 
