@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/napthedev/nettruyen-downloader-cli/compare/v1.0.0...v1.0.1) (2022-10-07)
+
+
+### Performance Improvements
+
+* bump version ([2eb8a8c](https://github.com/napthedev/nettruyen-downloader-cli/commit/2eb8a8cd1eb251b2f720cc16009127478b9135c4))
+
 # 1.0.0 (2022-10-07)
 
 
