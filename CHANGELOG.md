@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/napthedev/nettruyen-downloader-cli/compare/v1.0.2...v1.0.3) (2022-10-07)
+
+
+### Bug Fixes
+
+* build project before publish ([345245b](https://github.com/napthedev/nettruyen-downloader-cli/commit/345245b7046d1ab735507785fe59012ad2d90ffe))
+
 ## [1.0.2](https://github.com/napthedev/nettruyen-downloader-cli/compare/v1.0.1...v1.0.2) (2022-10-07)
 
 
